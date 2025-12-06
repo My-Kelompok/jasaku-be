@@ -1,14 +1,16 @@
-import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { ServiceType } from 'generated/prisma/client';
 
-export class CreateUserDto {
+export class RegisterDto {
+  @IsString()
   @IsNotEmpty()
   name: string;
 
   @IsEmail()
   email: string;
 
-  @MinLength(6)
+  @IsString()
+  @IsNotEmpty()
   password: string;
 
   @IsEnum(ServiceType)
