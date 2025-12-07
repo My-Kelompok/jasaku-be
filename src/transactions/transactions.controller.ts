@@ -65,7 +65,6 @@ export class TransactionsController {
     return {
       success: true,
       message: `Transaction ${transactionId} berhasil dihapus!`,
-      data: true,
     };
   }
 

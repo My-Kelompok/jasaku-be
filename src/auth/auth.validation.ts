@@ -6,7 +6,7 @@ export class AuthValidation {
     name: z.string().min(1).max(100),
     email: z.string().email().max(100),
     password: z.string().min(6).max(100),
-    serviceType: z.enum(Object.values(ServiceType) as [string, ...string[]]),
+    service_type: z.enum(Object.values(ServiceType) as [string, ...string[]]),
   });
   static readonly LOGIN: ZodType = z.object({
     email: z.string().email().max(100),

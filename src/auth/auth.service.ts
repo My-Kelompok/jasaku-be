@@ -20,20 +20,25 @@ export class AuthService {
       request,
     ) as RegisterUserRequest;
 
-    const totalUserWithSameUsername = await this.prismaService.user.count({
+    const totalUserWithSameEmail= await this.prismaService.user.count({
       where: {
         email: registerRequest.email,
       },
     });
 
-    if (totalUserWithSameUsername != 0) {
-      throw new HttpException('Username already registered', 400);
+    if (totalUserWithSameEmail!= 0) {
+      throw new HttpException('Email already registered', 400);
     }
 
     registerRequest.password = await hashPassword(registerRequest.password);
 
     const user = await this.prismaService.user.create({
-      data: registerRequest,
+      data: {
+        name: registerRequest.name,
+        email: registerRequest.email,
+        password: registerRequest.password,
+        serviceType: registerRequest.service_type,
+      },
     });
 
     return {
@@ -55,7 +60,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException('Username or password is invalid', 401);
+      throw new HttpException('Email or password is invalid', 401);
     }
 
     const isPasswordValid = await comparePassword(
@@ -64,7 +69,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new HttpException('Username or password is invalid', 401);
+      throw new HttpException('Email or password is invalid', 401);
     }
 
     user = await this.prismaService.user.update({

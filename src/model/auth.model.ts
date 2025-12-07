@@ -1,10 +1,10 @@
-import { ServiceType } from 'generated/prisma/enums';
+import { ServiceType } from "generated/prisma/enums";
 
 export class RegisterUserRequest {
   name: string;
   email: string;
   password: string;
-  serviceType: ServiceType;
+  service_type: ServiceType;
 }
 
 export class LoginUserRequest {
