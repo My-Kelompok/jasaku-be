@@ -29,10 +29,10 @@ model User {
   password    String
   serviceType ServiceType
   createdAt   DateTime    @default(now())
+  token       String?     @db.VarChar(100)
 
   transactions Transaction[]
   expenses     Expense[]
-  tokens       Token[]
 
   @@map("users")
 }
@@ -61,14 +61,4 @@ model Expense {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
-}
-
-model Token {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@map("tokens")
 }

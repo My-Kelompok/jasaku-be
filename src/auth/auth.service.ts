@@ -1,63 +1,79 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { hashPassword, comparePassword } from 'src/common/utils/bcrypt.util';
-import { generateToken } from 'src/common/utils/token.util';
+import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/auth.model";
+import { ValidationService } from "src/common/validation.service";
+import { AuthValidation } from "./auth.validation";
+import { comparePassword, hashPassword } from "src/common/utils/bcrypt.util";
+import { generateToken } from "src/common/utils/token.util";
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prismaService: PrismaService, private validationService: ValidationService) { }
 
-  async register(data: RegisterDto) {
-    const hashed = await hashPassword(data.password);
+  async register(request: RegisterUserRequest): Promise<UserResponse> {
+    const registerRequest = this.validationService.validate(
+      AuthValidation.REGISTER,
+      request,
+    ) as RegisterUserRequest;
 
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashed,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        serviceType: true,
-        createdAt: true,
+    const totalUserWithSameUsername = await this.prismaService.user.count({
+      where: {
+        email: registerRequest.email,
       },
     });
+
+    if (totalUserWithSameUsername != 0) {
+      throw new HttpException('Username already registered', 400);
+    }
+
+    registerRequest.password = await hashPassword(registerRequest.password);
+
+    const user = await this.prismaService.user.create({
+      data: registerRequest,
+    });
+
+    return {
+      email: user.email,
+      name: user.name,
+    };
   }
 
-  async login(data: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
+
+  async login(request: LoginUserRequest): Promise<UserResponse> {
+    const loginRequest = this.validationService.validate(
+      AuthValidation.LOGIN,
+      request,
+    ) as LoginUserRequest;
+
+    let user = await this.prismaService.user.findUnique({
+      where: {
+        email: loginRequest.email,
+      },
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new HttpException('Username or password is invalid', 401);
     }
 
-    const match = await comparePassword(data.password, user.password);
+    const isPasswordValid = await comparePassword(loginRequest.password, user.password,)
 
-    if (!match) {
-      throw new UnauthorizedException('Invalid email or password');
+    if (!isPasswordValid) {
+      throw new HttpException('Username or password is invalid', 401);
     }
 
-    const token = generateToken();
-
-    await this.prisma.token.create({
+    user = await this.prismaService.user.update({
+      where: {
+        email: loginRequest.email,
+      },
       data: {
-        token,
-        userId: user.id,
+        token: generateToken(),
       },
     });
 
-    return { token };
-  }
-
-  async validateToken(token: string) {
-    return this.prisma.token.findUnique({
-      where: { token },
-      include: { user: true },
-    });
+    return {
+      email: user.email,
+      name: user.name,
+      token: user.token!,
+    };
   }
 }
