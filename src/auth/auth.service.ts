@@ -20,13 +20,13 @@ export class AuthService {
       request,
     ) as RegisterUserRequest;
 
-    const totalUserWithSameEmail= await this.prismaService.user.count({
+    const totalUserWithSameEmail = await this.prismaService.user.count({
       where: {
         email: registerRequest.email,
       },
     });
 
-    if (totalUserWithSameEmail!= 0) {
+    if (totalUserWithSameEmail != 0) {
       throw new HttpException('Email already registered', 400);
     }
 

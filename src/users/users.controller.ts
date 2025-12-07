@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Patch } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Auth } from 'src/common/auth.decorator';
 import { User } from 'generated/prisma/client';
@@ -18,6 +18,17 @@ export class UsersController {
     return {
       success: true,
       message: 'User berhasil diupdate!',
+      data: result,
+    };
+  }
+
+  @Get('/current')
+  @HttpCode(200)
+  async get(@Auth() user: User): Promise<ApiResponse<UserResponse>> {
+    const result = await this.usersService.get(user);
+    return {
+      success: true,
+      message: 'User berhasil difetch!',
       data: result,
     };
   }

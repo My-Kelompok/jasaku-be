@@ -1,4 +1,4 @@
-import { ServiceType } from "generated/prisma/enums";
+import { ServiceType } from 'generated/prisma/enums';
 
 export class RegisterUserRequest {
   name: string;

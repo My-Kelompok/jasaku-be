@@ -39,4 +39,12 @@ export class UsersService {
       email: result.email,
     };
   }
+
+  async get(user: User): Promise<UserResponse> {
+    return {
+      email: user.email,
+      name: user.name,
+      service_type: user.serviceType,
+    };
+  }
 }
