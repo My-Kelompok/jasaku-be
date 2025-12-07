@@ -1,31 +1,42 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from 'generated/prisma/client';
+import { UpdateUserRequest, UserResponse } from 'src/model/users.model';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersValidation } from './users.validation';
+import { hashPassword } from 'src/common/utils/bcrypt.util';
+import { ValidationService } from 'src/common/validation.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private validationService: ValidationService,
+  ) {}
 
-  async findAll() {
-    return this.prisma.user.findMany();
-  }
+  async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
+    const updateRequest = this.validationService.validate(
+      UsersValidation.UPDATE,
+      request,
+    ) as UpdateUserRequest;
 
-  async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException('User not found');
-    return user;
-  }
+    if (updateRequest.name) {
+      user.name = updateRequest.name;
+    }
 
-  async update(id: string, data: UpdateUserDto) {
-    await this.findOne(id);
-    return this.prisma.user.update({
-      where: { id },
-      data,
+    if (updateRequest.password) {
+      user.password = await hashPassword(updateRequest.password);
+    }
+
+    const result = await this.prismaService.user.update({
+      where: {
+        email: user.email,
+      },
+      data: user,
     });
-  }
 
-  async remove(id: string) {
-    await this.findOne(id);
-    return this.prisma.user.delete({ where: { id } });
+    return {
+      name: result.name,
+      email: result.email,
+    };
   }
 }

@@ -1,5 +1,5 @@
-import { ServiceType } from "generated/prisma/enums";
-import z, { ZodType } from "zod";
+import { ServiceType } from 'generated/prisma/enums';
+import z, { ZodType } from 'zod';
 
 export class AuthValidation {
   static readonly REGISTER = z.object({

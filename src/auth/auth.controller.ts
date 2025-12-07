@@ -1,11 +1,12 @@
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/auth.model";
-import { ApiResponse } from "src/model/api.model";
+import { LoginUserRequest, RegisterUserRequest } from 'src/model/auth.model';
+import { ApiResponse } from 'src/model/api.model';
+import { UserResponse } from 'src/model/users.model';
 
 @Controller('/api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Post('/register')
   @HttpCode(200)
@@ -15,7 +16,7 @@ export class AuthController {
     const result = await this.authService.register(request);
     return {
       success: true,
-      message: "User berhasil register!",
+      message: 'User berhasil register!',
       data: result,
     };
   }
@@ -28,7 +29,7 @@ export class AuthController {
     const result = await this.authService.login(request);
     return {
       success: true,
-      message: "User berhasil login!",
+      message: 'User berhasil login!',
       data: result,
     };
   }

@@ -1,14 +1,18 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/auth.model";
-import { ValidationService } from "src/common/validation.service";
-import { AuthValidation } from "./auth.validation";
-import { comparePassword, hashPassword } from "src/common/utils/bcrypt.util";
-import { generateToken } from "src/common/utils/token.util";
+import { LoginUserRequest, RegisterUserRequest } from 'src/model/auth.model';
+import { ValidationService } from 'src/common/validation.service';
+import { AuthValidation } from './auth.validation';
+import { comparePassword, hashPassword } from 'src/common/utils/bcrypt.util';
+import { generateToken } from 'src/common/utils/token.util';
+import { UserResponse } from 'src/model/users.model';
 
 @Injectable()
 export class AuthService {
-  constructor(private prismaService: PrismaService, private validationService: ValidationService) { }
+  constructor(
+    private prismaService: PrismaService,
+    private validationService: ValidationService,
+  ) {}
 
   async register(request: RegisterUserRequest): Promise<UserResponse> {
     const registerRequest = this.validationService.validate(
@@ -38,7 +42,6 @@ export class AuthService {
     };
   }
 
-
   async login(request: LoginUserRequest): Promise<UserResponse> {
     const loginRequest = this.validationService.validate(
       AuthValidation.LOGIN,
@@ -55,7 +58,10 @@ export class AuthService {
       throw new HttpException('Username or password is invalid', 401);
     }
 
-    const isPasswordValid = await comparePassword(loginRequest.password, user.password,)
+    const isPasswordValid = await comparePassword(
+      loginRequest.password,
+      user.password,
+    );
 
     if (!isPasswordValid) {
       throw new HttpException('Username or password is invalid', 401);
