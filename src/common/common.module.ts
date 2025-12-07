@@ -3,11 +3,9 @@ import { ValidationService } from './validation.service';
 import { APP_FILTER } from '@nestjs/core';
 import { ErrorFilter } from 'src/model/error.filter';
 import { AuthMiddleware } from './auth.middleware';
-import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Global()
 @Module({
-  imports: [PrismaModule],
   providers: [
     ValidationService,
     {

@@ -8,9 +8,8 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: any, res: any, next: (error?: any) => void) {
     const token = req.headers['authorization'];
 
-    const cleanToken = token.replace(/^Bearer\s+/i, '');
-
     if (token) {
+      const cleanToken = token.replace(/^Bearer\s+/i, '');
       const user = await this.prismaService.user.findFirst({
         where: {
           token: cleanToken,
